@@ -36,9 +36,7 @@
         </form>
         <p>Already have an account? <a href="#" onclick="toggleForms();">Login</a></p>
     </div>
-    <button onclick="window.location.href='log.html'" style="font-weight: bold; font-size: small; background-color: #334a22; color: white; padding: 8px 16px; border-radius: 3px; cursor: pointer;">
-        Go to Log Page
-    </button>
+    
     
 </div>
 
@@ -56,17 +54,19 @@
     }
 
     function handleLogin(event) {
-        event.preventDefault();
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
+    event.preventDefault(); // Prevent the default form submission behavior
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
 
-        // In a real application, you would verify these credentials on the server
-        if (username === "user" && password === "pass") {
-            window.location.href = "welcome.html";
-        } else {
-            alert('Invalid credentials. Please try again.');
-        }
+    // In a real application, you would verify these credentials on the server
+    if (username === "user" && password === "pass") {
+        window.location.href = "welcome.html"; // Redirect to welcome page
+    } else if (username === "root" && password === "root") {
+        window.location.href = "log.html"; // Redirect to log page
+    } else {
+        alert('Invalid credentials. Please try again.'); // Alert for invalid credentials
     }
+}
 
     function handleSignup(event) {
         event.preventDefault();
