@@ -1,0 +1,207 @@
+<!-- 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RFID Input to Table</title>
+</head>
+<body>
+    <h1>RFID Input Example</h1>
+
+    <div>
+        <button onclick="setStatus('In lab')">In lab</button>
+        <button onclick="setStatus('At hostel')">At hostel</button>
+    </div>
+    <p id="selected-status">Selected Status: None</p>
+
+    <input type="text" id="rfid-input" placeholder="Scan RFID tag here" autofocus />
+
+    <table id="rfid-table">
+        <thead>
+            <tr>
+                <th>RFID Tag</th>
+                <th>Status</th>
+                <th>Timestamp</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <script>
+        const inputField = document.getElementById('rfid-input');
+        const tableBody = document.getElementById('rfid-table').querySelector('tbody');
+        const statusDisplay = document.getElementById('selected-status');
+        let selectedStatus = null;
+
+        // Load existing data
+        const storedData = JSON.parse(localStorage.getItem('rfidLogs')) || [];
+        storedData.forEach(data => addRow(data.rfidTag, data.status, data.timestamp, false));
+
+        // Function to set the selected status
+        function setStatus(status) {
+            selectedStatus = status;
+            statusDisplay.textContent = `Selected Status: ${status}`;
+        }
+
+        // Add RFID entry on Enter key press
+        inputField.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                if (inputField.value && selectedStatus) {
+                    const rfidTag = inputField.value;
+                    const timestamp = new Date().toLocaleString();
+                    addRow(rfidTag, selectedStatus, timestamp, true);
+                    inputField.value = ''; // Clear input field
+                } else {
+                    alert("Please select a status before scanning.");
+                }
+            }
+        });
+
+        function addRow(rfidTag, status, timestamp, save = true) {
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `<td>${rfidTag}</td><td>${status}</td><td>${timestamp}</td>`;
+            tableBody.appendChild(newRow);
+
+            if (save) {
+                storedData.push({ rfidTag, status, timestamp });
+                localStorage.setItem('rfidLogs', JSON.stringify(storedData));
+            }
+        }
+    </script>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RFID Input to Table</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>RFID Input Example</h1>
+
+    <!-- Status Buttons -->
+    <div>
+        <button onclick="setStatus('In lab')">In lab</button>
+        <button onclick="setStatus('At hostel')">At hostel</button>
+    </div>
+    <p id="selected-status">Selected Status: None</p>
+
+    <!-- RFID Input Field -->
+    <input type="text" id="rfid-input" placeholder="Scan RFID tag here" autofocus />
+    <button id="search-button">Search</button>
+
+    <table id="rfid-table">
+        <thead>
+            <tr>
+                <th>RFID Tag</th>
+                <th>Status</th>
+                <th>Timestamp</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- New rows will be added here -->
+        </tbody>
+    </table>
+
+    <script>
+        const inputField = document.getElementById('rfid-input');
+        const tableBody = document.getElementById('rfid-table').querySelector('tbody');
+        const statusDisplay = document.getElementById('selected-status');
+        let selectedStatus = null;
+
+        // Load existing data from localStorage
+        function loadStoredData() {
+            const storedData = JSON.parse(localStorage.getItem('rfidLogs')) || [];
+            storedData.forEach(data => addRow(data.rfidTag, data.status, data.timestamp));
+        }
+
+        // Set the selected status
+        function setStatus(status) {
+            selectedStatus = status;
+            statusDisplay.textContent = `Selected Status: ${status}`;
+        }
+
+        // Handle RFID input
+        inputField.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                if (inputField.value && selectedStatus) {
+                    const rfidTag = inputField.value.trim();
+                    const timestamp = new Date().toLocaleString();
+                    addOrUpdateRow(rfidTag, selectedStatus, timestamp);
+                    inputField.value = ''; // Clear input field
+                } else {
+                    alert("Please select a status before scanning.");
+                }
+            }
+        });
+
+        // Search for an RFID tag
+        document.getElementById('search-button').addEventListener('click', () => {
+            const searchTag = inputField.value.trim();
+            if (searchTag) {
+                const storedData = JSON.parse(localStorage.getItem('rfidLogs')) || [];
+                const entry = storedData.find(data => data.rfidTag === searchTag);
+                if (entry) {
+                    inputField.value = entry.rfidTag;
+                    setStatus(entry.status); // Set the status based on existing data
+                } else {
+                    alert("No entry found for the given RFID tag.");
+                }
+            }
+        });
+
+        function addOrUpdateRow(rfidTag, status, timestamp) {
+            const storedData = JSON.parse(localStorage.getItem('rfidLogs')) || [];
+            const existingIndex = storedData.findIndex(data => data.rfidTag === rfidTag);
+
+            if (existingIndex > -1) {
+                // Update existing entry
+                storedData[existingIndex].status = status;
+                storedData[existingIndex].timestamp = timestamp; // Update timestamp
+            } else {
+                // Add new entry
+                storedData.push({ rfidTag, status, timestamp });
+            }
+
+            // Update localStorage and refresh table
+            localStorage.setItem('rfidLogs', JSON.stringify(storedData));
+            refreshTable(storedData);
+        }
+
+        function addRow(rfidTag, status, timestamp) {
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `<td>${rfidTag}</td><td>${status}</td><td>${timestamp}</td>`;
+            tableBody.appendChild(newRow);
+        }
+
+        function refreshTable(data) {
+            tableBody.innerHTML = ''; // Clear existing table rows
+            data.forEach(entry => addRow(entry.rfidTag, entry.status, entry.timestamp));
+        }
+
+        // Load stored data on page load
+        loadStoredData();
+    </script>
+</body>
+</html>
